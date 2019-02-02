@@ -24,17 +24,22 @@ int pulseWidthMicros = 20;  // microseconds
 int millisbetweenSteps = 40; // milliseconds 
 
 void setup() {
+  // Init pins and serial
   Serial.begin(9600);
   scale.set_gain(128);
   pinMode(directionPin, OUTPUT);
   pinMode(stepPin, OUTPUT);
   pinMode(nemaSleep, OUTPUT);
   digitalWrite(nemaSleep, HIGH);
-  while(Serial.available() == 0) { }  
-  //Serial.println("XXXXXX");
-  digitalWrite(nemaSleep, LOW);
+
+  
+  while(Serial.available() == 0) { }  // Waits for input from Python script.
+  digitalWrite(nemaSleep, LOW); // Puts stepper to sleep.
+  
   init_scale();
+ 
   Serial.println("Distance, Newtons");
+ // While loop for testing.
   while (testing == true) {
     getForce();
     checkState();
