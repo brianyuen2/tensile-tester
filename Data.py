@@ -2,16 +2,20 @@ import serial
 import matplotlib.pyplot as plt
 import numpy as np
 
-port = 'COM9'
+port = 'COM9' # Change this to the com the arduino uses.
 rate = 9600;
 ser = serial.Serial(port, rate, timeout = 5)
-f = open('csvfile.csv','w')
+
+f = open('csvfile.csv','w') # This will create a csvfile in the project directory.
+
 print("Enter any number in the console to begin.")
 input();
 print("Attach the sample and enter another number to begin.")
 x = input();
 ser.write(x.encode('utf-8'))
 print("Starting now...")
+
+
 while True:
     line = ser.readline();
     line = line.decode("utf-8") #ser.readline returns a binary, convert to string
