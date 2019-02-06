@@ -9,7 +9,6 @@ rate = 9600;
 ser = serial.Serial(port, rate, timeout = 5)
 
 timestr = time.strftime("%d%m%Y-%H%M%S")
-
 f = open(timestr+'.csv','w') # This will create a csvfile in the project directory.
 
 print("Enter any number in the console to begin.")
@@ -30,6 +29,7 @@ while not done:
         print(line);
     else:
         break
+    # pressing 's' stops the arduino.
     if msvcrt.kbhit():
         letter = msvcrt.getch()
         if letter == b's':
@@ -38,6 +38,7 @@ while not done:
 
 f.close()
 
+# Plots graph.
 x, y = np.loadtxt(timestr +'.csv', delimiter=',',skiprows=12, unpack=True)
 plt.plot(x,y, label='Loaded from file!')
 
