@@ -32,8 +32,11 @@ void setup() {
   pinMode(nemaSleep, OUTPUT);
   digitalWrite(nemaSleep, HIGH);
 
+  int flag = 0;
+  while(flag == 0) { 
+    flag = Serial.available();
+  }  // Waits for input from Python script.
   
-  while(Serial.available() == 0) { }  // Waits for input from Python script.
   digitalWrite(nemaSleep, LOW); // Puts stepper to sleep.
   
   init_scale();
@@ -41,10 +44,19 @@ void setup() {
   Serial.println("Distance, Newtons");
  // While loop for testing.
   while (testing == true) {
+   
     getForce();
+    if (Serial.read() == 115) {
+      //Serial.println("Done");
+      forceFlag = false;
+      newtons = 0;
+    }
+    
     checkState();
     moveMotor();
     countSteps();
+
+    
   }
   //printData();
   digitalWrite(nemaSleep, HIGH);
@@ -91,7 +103,7 @@ void printData() {
 } 
 
 void countSteps() {
-  if(newtons > 0.01) { 
+  if(newtons > 0.02) { 
     steps += 1;
   }
 }
@@ -100,7 +112,7 @@ void checkState() {
 if(newtons > 0.1) {
     forceFlag = false;
   }
-  if((forceFlag == false) && (newtons < 0.05)) {
+  if((forceFlag == false) && (newtons < 0.1)) {
     testing = false;
   }
 }
