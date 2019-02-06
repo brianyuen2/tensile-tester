@@ -20,8 +20,6 @@ long raw;
 #define directionPin 8
 #define stepPin 9
 #define nemaSleep 7
-int pulseWidthMicros = 20;  // microseconds
-int millisbetweenSteps = 40; // milliseconds 
 
 void setup() {
   // Init pins and serial
@@ -30,22 +28,24 @@ void setup() {
   pinMode(directionPin, OUTPUT);
   pinMode(stepPin, OUTPUT);
   pinMode(nemaSleep, OUTPUT);
-  digitalWrite(nemaSleep, HIGH);
+  
+  digitalWrite(nemaSleep, HIGH); // Puts stepper to sleep so you can adjust height while attaching sample.
 
   int flag = 0;
   while(flag == 0) { 
     flag = Serial.available();
   }  // Waits for input from Python script.
   
-  digitalWrite(nemaSleep, LOW); // Puts stepper to sleep.
+  digitalWrite(nemaSleep, LOW); // Wakes stepper up.
   
   init_scale();
  
   Serial.println("Distance, Newtons");
- // While loop for testing.
+ // While loop for testing the sample.
   while (testing == true) {
    
     getForce();
+    
     if (Serial.read() == 115) {
       //Serial.println("Done");
       forceFlag = false;
@@ -90,7 +90,6 @@ void getForce() {
 
 void moveMotor() {
   digitalWrite(stepPin, HIGH);
-  delayMicroseconds(pulseWidthMicros); // this line is probably unnecessary
   digitalWrite(stepPin, LOW); 
   
 }
