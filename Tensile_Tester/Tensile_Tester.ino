@@ -115,3 +115,5 @@ if(newtons > 0.1) {
     testing = false;
   }
 }
+
+//======== Compression Test Functions
