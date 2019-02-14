@@ -13,7 +13,7 @@ int steps;
 //================ Load Cell =====================
 HX711 scale(A1, A0);
 long offset = 0;
-double Scale = 363.75;
+double Scale = 375.14;
 long raw; 
 
 //============== Stepper Motor ===============
