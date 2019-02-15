@@ -1,6 +1,7 @@
 
 #include <Wire.h>
 #include <HX711.h>
+#include <Stepper.h>
 
 double distance;
 double mass;
@@ -8,6 +9,7 @@ double newtons;
 double maxNewtons;
 bool tensileTesting = true;
 bool forceFlag = true;
+bool compressionTesting = true;
 int steps;
 
 //================ Load Cell =====================
@@ -17,6 +19,7 @@ double Scale = 375.14;
 long raw; 
 
 //============== Stepper Motor ===============
+
 #define directionPin 8
 #define stepPin 9
 #define nemaSleep 7
@@ -44,7 +47,9 @@ void setup() {
   if(choice == 49) {
     tensileTest();
   } else if(choice == 50) {
-    Serial.println("Compression test");
+    double distanceTravel = Serial.parseFloat();
+    Serial.println(distanceTravel);
+    compressionTest();
   }
   //printData();
   digitalWrite(nemaSleep, HIGH);
@@ -107,14 +112,49 @@ if(newtons > 0.1) {
 void tensileTest() {
   while (tensileTesting == true) {
     getForce();    
-    if (Serial.read() == 115) {
-      //Serial.println("Done");
-      forceFlag = false;
-      newtons = 0;
-    }    
+    checkStop();
     checkState();
     moveMotor();
     countSteps();   
   }
 }
+void checkStop() {
+  if (Serial.read() == 115) {
+      forceFlag = false;
+      newtons = 0;
+  } 
+}
 //======== Compression Testing Functions ===============
+
+void compressionTest() {
+  while(compressionTesting == true) {
+    getForceC();
+    checkStopC();
+    moveMotorC();
+    if(newtons > 1) {
+      compressionTesting == false;
+    }
+  }
+}
+
+void getForceC() {
+   raw = scale.read_average(1);
+   mass = (raw - offset)/Scale;
+   newtons = -mass*9.81/1000;
+   if(newtons > maxNewtons) {
+    maxNewtons = newtons;
+   }
+   Serial.print(steps / 25.0); Serial.print(", ");
+   Serial.println(newtons); 
+}
+
+void checkStopC() {
+  if (Serial.read() == 115) {
+      compressionTesting = false;
+  } 
+}
+void moveMotorC() {
+  digitalWrite(directionPin, HIGH);
+  digitalWrite(stepPin, HIGH);
+  digitalWrite(stepPin, LOW);   
+}
