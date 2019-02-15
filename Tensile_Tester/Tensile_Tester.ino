@@ -1,14 +1,17 @@
 
 #include <Wire.h>
 #include <HX711.h>
+#include <Stepper.h>
 
 double distance;
 double mass;
 double newtons;
 double maxNewtons;
-bool testing = true;
+bool tensileTesting = true;
 bool forceFlag = true;
+bool compressionTesting = true;
 int steps;
+double distanceTravel;
 
 //================ Load Cell =====================
 HX711 scale(A1, A0);
@@ -17,6 +20,7 @@ double Scale = 375.14;
 long raw; 
 
 //============== Stepper Motor ===============
+
 #define directionPin 8
 #define stepPin 9
 #define nemaSleep 7
@@ -31,32 +35,22 @@ void setup() {
   
   digitalWrite(nemaSleep, HIGH); // Puts stepper to sleep so you can adjust height while attaching sample.
 
-  int flag = 0;
-  while(flag == 0) { 
-    flag = Serial.available();
-  }  // Waits for input from Python script.
+  int choice = -1;
+  while(choice == -1){
+    choice = Serial.read();
+  }  // Gets choice from Python script.
   
   digitalWrite(nemaSleep, LOW); // Wakes stepper up.
   
   init_scale();
  
   Serial.println("Distance, Newtons");
- // While loop for testing the sample.
-  while (testing == true) {
-   
-    getForce();
-    
-    if (Serial.read() == 115) {
-      //Serial.println("Done");
-      forceFlag = false;
-      newtons = 0;
-    }
-    
-    checkState();
-    moveMotor();
-    countSteps();
+  if(choice == 49) {
+    tensileTest();
+  } else if(choice == 50) {
+    distanceTravel = Serial.parseFloat();
 
-    
+    compressionTest();
   }
   //printData();
   digitalWrite(nemaSleep, HIGH);
@@ -66,7 +60,7 @@ void setup() {
 void loop() {
 }
 
-//============ Functions ==================
+//============ Tensile Testing Functions ==================
 
 void init_scale(){
   for(int i = 0; i < 5; i++) {
@@ -112,6 +106,54 @@ if(newtons > 0.1) {
     forceFlag = false;
   }
   if((forceFlag == false) && (newtons < 0.1)) {
-    testing = false;
+    tensileTesting = false;
+  } else if (Serial.read() == 115) {
+    forceFlag = false;
+    newtons = 0;
+  } 
+}
+
+void tensileTest() {
+  while (tensileTesting == true) {
+    getForce();    
+    checkState();
+    moveMotor();
+    countSteps();   
   }
+}
+
+//======== Compression Testing Functions ===============
+
+void compressionTest() {
+  digitalWrite(directionPin, HIGH);
+  while(compressionTesting == true) {
+    getForceC();
+    checkStateC();
+    moveMotorC();
+    countSteps();
+  }
+}
+
+void getForceC() {
+   raw = scale.read_average(1);
+   mass = (raw - offset)/Scale;
+   newtons = -mass*9.81/1000;
+   if(newtons > maxNewtons) {
+    maxNewtons = newtons;
+   }
+   Serial.print(steps / 25.0); Serial.print(", ");
+   Serial.println(newtons); 
+}
+
+void checkStateC() {
+  distance = steps / 25.0;
+  if (Serial.read() == 115) {
+    compressionTesting = false;
+  } else if(distance >= distanceTravel) {
+    compressionTesting = false;
+  }
+}
+void moveMotorC() {
+  digitalWrite(stepPin, HIGH);
+  digitalWrite(stepPin, LOW);   
 }
