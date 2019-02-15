@@ -11,6 +11,7 @@ bool tensileTesting = true;
 bool forceFlag = true;
 bool compressionTesting = true;
 int steps;
+double distanceTravel;
 
 //================ Load Cell =====================
 HX711 scale(A1, A0);
@@ -47,8 +48,8 @@ void setup() {
   if(choice == 49) {
     tensileTest();
   } else if(choice == 50) {
-    double distanceTravel = Serial.parseFloat();
-    Serial.println(distanceTravel);
+    distanceTravel = Serial.parseFloat();
+
     compressionTest();
   }
   //printData();
@@ -106,34 +107,30 @@ if(newtons > 0.1) {
   }
   if((forceFlag == false) && (newtons < 0.1)) {
     tensileTesting = false;
-  }
+  } else if (Serial.read() == 115) {
+    forceFlag = false;
+    newtons = 0;
+  } 
 }
 
 void tensileTest() {
   while (tensileTesting == true) {
     getForce();    
-    checkStop();
     checkState();
     moveMotor();
     countSteps();   
   }
 }
-void checkStop() {
-  if (Serial.read() == 115) {
-      forceFlag = false;
-      newtons = 0;
-  } 
-}
+
 //======== Compression Testing Functions ===============
 
 void compressionTest() {
+  digitalWrite(directionPin, HIGH);
   while(compressionTesting == true) {
     getForceC();
-    checkStopC();
+    checkStateC();
     moveMotorC();
-    if(newtons > 1) {
-      compressionTesting == false;
-    }
+    countSteps();
   }
 }
 
@@ -148,13 +145,15 @@ void getForceC() {
    Serial.println(newtons); 
 }
 
-void checkStopC() {
+void checkStateC() {
+  distance = steps / 25.0;
   if (Serial.read() == 115) {
-      compressionTesting = false;
-  } 
+    compressionTesting = false;
+  } else if(distance >= distanceTravel) {
+    compressionTesting = false;
+  }
 }
 void moveMotorC() {
-  digitalWrite(directionPin, HIGH);
   digitalWrite(stepPin, HIGH);
   digitalWrite(stepPin, LOW);   
 }

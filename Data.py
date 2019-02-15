@@ -26,6 +26,7 @@ if choice == '2':
 
 ser.write(choice.encode('utf-8'))
 ser.write(distance.encode('utf-8'))
+
 while (1):
     line = ser.readline();
     line = line.decode("utf-8") #ser.readline returns a binary, convert to string
@@ -41,7 +42,7 @@ while (1):
             ser.write('s'.encode('utf-8'))
 
 
-'''f.close()
+f.close()
 
 # Plots graph.
 x, y = np.loadtxt(timestr +'.csv', delimiter=',',skiprows=12, unpack=True)
@@ -51,4 +52,4 @@ plt.xlabel('Distance (mm)')
 plt.ylabel('Force (N)')
 plt.title('Distance v Force Graph')
 plt.legend()
-plt.show()'''
+plt.show()
