@@ -16,9 +16,15 @@ input();
 msvcrt.getch()
 
 print("Enter '1' for tensile test or '2' for compression test")
-x = input();
+choice = input();
 msvcrt.getch()
-ser.write(x.encode('utf-8'))
+
+if choice == '2':
+    print("Enter the testing distance with no units. (Test is in mm)")
+    distance = input();
+    msvcrt.getch()
+
+ser.write(choice.encode('utf-8'))
 
 while (1):
     line = ser.readline();
