@@ -6,7 +6,7 @@ double distance;
 double mass;
 double newtons;
 double maxNewtons;
-bool testing = true;
+bool tensileTesting = true;
 bool forceFlag = true;
 int steps;
 
@@ -31,32 +31,20 @@ void setup() {
   
   digitalWrite(nemaSleep, HIGH); // Puts stepper to sleep so you can adjust height while attaching sample.
 
-  int flag = 0;
-  while(flag == 0) { 
-    flag = Serial.available();
-  }  // Waits for input from Python script.
+  int choice = -1;
+  while(choice == -1){
+    choice = Serial.read();
+  }  // Gets choice from Python script.
   
   digitalWrite(nemaSleep, LOW); // Wakes stepper up.
   
   init_scale();
  
   Serial.println("Distance, Newtons");
- // While loop for testing the sample.
-  while (testing == true) {
-   
-    getForce();
-    
-    if (Serial.read() == 115) {
-      //Serial.println("Done");
-      forceFlag = false;
-      newtons = 0;
-    }
-    
-    checkState();
-    moveMotor();
-    countSteps();
-
-    
+  if(choice == 49) {
+    tensileTest();
+  } else if(choice == 50) {
+    Serial.println("Compression test");
   }
   //printData();
   digitalWrite(nemaSleep, HIGH);
@@ -66,7 +54,7 @@ void setup() {
 void loop() {
 }
 
-//============ Functions ==================
+//============ Tensile Testing Functions ==================
 
 void init_scale(){
   for(int i = 0; i < 5; i++) {
@@ -112,8 +100,21 @@ if(newtons > 0.1) {
     forceFlag = false;
   }
   if((forceFlag == false) && (newtons < 0.1)) {
-    testing = false;
+    tensileTesting = false;
   }
 }
 
-//======== Compression Test Functions
+void tensileTest() {
+  while (tensileTesting == true) {
+    getForce();    
+    if (Serial.read() == 115) {
+      //Serial.println("Done");
+      forceFlag = false;
+      newtons = 0;
+    }    
+    checkState();
+    moveMotor();
+    countSteps();   
+  }
+}
+//======== Compression Testing Functions ===============
