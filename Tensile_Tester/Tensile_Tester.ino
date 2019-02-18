@@ -1,7 +1,7 @@
 
 #include <Wire.h>
 #include <HX711.h>
-#include <Stepper.h>
+
 
 double distance;
 double mass;
@@ -49,7 +49,6 @@ void setup() {
     tensileTest();
   } else if(choice == 50) {
     distanceTravel = Serial.parseFloat();
-
     compressionTest();
   }
   //printData();
@@ -102,14 +101,11 @@ void countSteps() {
 }
 
 void checkState() {
-if(newtons > 0.1) {
-    forceFlag = false;
-  }
-  if((forceFlag == false) && (newtons < 0.1)) {
+  if(newtons > 0.1) {
+      forceFlag = false;
+    }
+  if(((forceFlag == false) && (newtons < 0.1)) || (Serial.read() == 115)) {
     tensileTesting = false;
-  } else if (Serial.read() == 115) {
-    forceFlag = false;
-    newtons = 0;
   } 
 }
 

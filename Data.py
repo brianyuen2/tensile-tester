@@ -4,7 +4,7 @@ import numpy as np
 import msvcrt
 import time
 
-port = 'COM3' # Change this to the com the arduino uses.
+port = 'COM9' # Change this to the com the arduino uses.
 rate = 9600;
 ser = serial.Serial(port, rate, timeout = 5)
 
@@ -23,9 +23,12 @@ if choice == '2':
     print("Enter the testing distance with no units. (Test is in mm)")
     distance = input();
     msvcrt.getch()
+    ser.write(choice.encode('utf-8'))
+    ser.write(distance.encode('utf-8'))
+elif choice == '1':
+    ser.write(choice.encode('utf-8'))
 
-ser.write(choice.encode('utf-8'))
-ser.write(distance.encode('utf-8'))
+
 
 while (1):
     line = ser.readline();
